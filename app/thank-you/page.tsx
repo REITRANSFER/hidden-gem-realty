@@ -353,6 +353,22 @@ function ThankYouV1() {
             <strong>24 hours</strong> with your cash offer. In the meantime, here are answers to common questions.
           </p>
         </div>
+      </div>
+
+      {/* While You Wait — Blob-hosted video gallery (flat list of 4), above the note (Jenkins order) */}
+      <section className="mx-auto max-w-7xl px-4 pb-12">
+        <div className="mb-6 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 md:text-3xl text-balance">
+            While You Wait, Watch &amp; Learn
+          </h2>
+          <p className="mx-auto mt-2 max-w-2xl text-gray-600">
+            Short videos answering the most common questions homeowners ask us.
+          </p>
+        </div>
+        <VideoGallery accentColor={config.accentColor} />
+      </section>
+
+      <div className="mx-auto max-w-2xl px-4 py-12 md:py-20">
 
         {/* Video section */}
         {process.env.NEXT_PUBLIC_THANKYOU_VIDEO_URL && (
@@ -428,24 +444,6 @@ function ThankYouV1() {
             </p>
           </div>
         </div>
-      </div>
-
-      {/* While You Wait — Blob-hosted video gallery (flat list of 4) */}
-      <section className="px-4 pb-2">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-6 text-center">
-            <h2 className="text-2xl font-bold text-gray-900 md:text-3xl">
-              While You Wait, Watch &amp; Learn
-            </h2>
-            <p className="mx-auto mt-2 max-w-2xl text-gray-600">
-              Short videos answering the most common questions homeowners ask us.
-            </p>
-          </div>
-          <VideoGallery accentColor={config.accentColor} />
-        </div>
-      </section>
-
-      <div className="mx-auto max-w-2xl px-4">
 
         {/* While you wait: advertorial reads */}
         <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6 md:p-8 mb-6">

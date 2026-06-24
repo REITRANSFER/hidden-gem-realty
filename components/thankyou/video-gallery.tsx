@@ -1,7 +1,7 @@
 "use client"
 
-import { useMemo, useState } from "react"
-import { Play } from "lucide-react"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { Play, VolumeX } from "lucide-react"
 import { VIDEOS, type VideoEntry } from "@/lib/thank-you-videos"
 
 /**
@@ -80,6 +80,42 @@ export function VideoGallery({ accentColor }: VideoGalleryProps) {
   )
 
   const [selected, setSelected] = useState<PlayableVideo | null>(playable[0] ?? null)
+  const videoRef = useRef<HTMLVideoElement | null>(null)
+
+  // The first video autoplays muted with a "tap for sound" overlay. Once the
+  // user unmutes OR picks any chapter, we treat them as having interacted:
+  // subsequent videos play normally (with sound) and the overlay never returns.
+  const [hasInteracted, setHasInteracted] = useState(false)
+
+  // Autoplay on each video mount. The <video> is keyed by src, so it remounts
+  // per selection and this effect re-runs. muted is set on the DOM node (React
+  // does not reliably reflect the muted prop), otherwise browsers block autoplay.
+  useEffect(() => {
+    const v = videoRef.current
+    if (!v) return
+    v.muted = !hasInteracted
+    v.play().catch(() => {
+      /* autoplay may be blocked; native controls / overlay still allow manual play */
+    })
+    // hasInteracted intentionally omitted: unmuting is handled by handleUnmute,
+    // and chapter picks change selected.src which re-runs this with the latest value.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected?.src])
+
+  const handleSelect = (video: PlayableVideo) => {
+    setHasInteracted(true)
+    setSelected(video)
+  }
+
+  const handleUnmute = () => {
+    const v = videoRef.current
+    if (v) {
+      v.muted = false
+      v.currentTime = 0
+      v.play().catch(() => {})
+    }
+    setHasInteracted(true)
+  }
 
   if (!selected) return null
 
@@ -92,12 +128,29 @@ export function VideoGallery({ accentColor }: VideoGalleryProps) {
             {/* key forces a remount so only the selected video element loads */}
             <video
               key={selected.src}
+              ref={videoRef}
               src={selected.src}
               controls
               playsInline
               preload="metadata"
               className="h-full w-full"
             />
+            {!hasInteracted && (
+              <button
+                type="button"
+                onClick={handleUnmute}
+                aria-label="Tap for sound: unmute and restart the video"
+                className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-black/40 text-white transition-colors hover:bg-black/50 focus:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-white/70"
+              >
+                <span
+                  className="flex h-16 w-16 items-center justify-center rounded-full shadow-lg"
+                  style={{ backgroundColor: accentColor }}
+                >
+                  <VolumeX className="h-8 w-8" />
+                </span>
+                <span className="text-sm font-semibold tracking-wide">Tap for sound</span>
+              </button>
+            )}
           </div>
           <div className="bg-gray-900 px-5 py-3">
             <h3 className="text-base font-semibold text-white">{selected.title}</h3>
@@ -120,7 +173,7 @@ export function VideoGallery({ accentColor }: VideoGalleryProps) {
                 index={idx}
                 isActive={video.src === selected.src}
                 accentColor={accentColor}
-                onClick={() => setSelected(video)}
+                onClick={() => handleSelect(video)}
               />
             ))}
           </div>
